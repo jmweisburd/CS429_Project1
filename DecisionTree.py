@@ -18,7 +18,8 @@ def logEquation(num, den):
 class Node:
     def __init__(self, sub_attribute_split, e_subset, a_attributes):
         self.e_subset = e_subset
-        self.a_attributes = copy.deepcopy(a_attributes) #available attributes
+        self.a_attributes = a_attributes
+        #self.a_attributes = copy.deepcopy(a_attributes) #available attributes
         self.sub_attribute_split = sub_attribute_split
         self.total = len(e_subset)
         self.num_pos = 0
@@ -30,14 +31,14 @@ class Node:
         self.attribute_to_split_on = 0
         self.children = []
         
+        self.countNegativesAndPositives()
+        print "number negatives:", self.num_neg
+        print "number positives:", self.num_pos
         self.classifyNode()
-        self.splitNode()
+        if self.node_type != "no" and self.node_type != "yes":
+            self.splitNode()
                     
     def splitNode(self):
-        if self.node_type == "no" or self.node_type == "yes":
-            print self.node_type
-            return
-        
         self.fillEntropyList()
         self.calculateNodeEntropy()
         self.calculateAttributeEntropy()
@@ -46,36 +47,43 @@ class Node:
 
     def splitOnAttribute(self):
         get_attribute = None
+        entity_subset = []
         for a in self.a_attributes:
             if a.number == self.attribute_to_split_on:
-                print a.number
                 get_attribute = a
                 break
     
-        attributes_to_pass_on = copy.deepcopy(a_attributes)
-        attributes_to_pass_on.remove(get_attribute)
+        #attributes_to_pass_on = copy.deepcopy(self.a_attributes)
+        #for a in attributes_to_pass_on:
+            #if a.number == self.attribute_to_split_on:
+            #attributes_to_pass_on.remove(a)
+        
         for sub_attribute in get_attribute.sub_attributes:
-            
-            self.children.append(Node())
-                
-    
-    def classifyNode(self):
+            print sub_attribute
+            entity_subset = []
+            entity_subset = self.makeSubattributeList(get_attribute.number, sub_attribute)
+            self.children.append(Node(sub_attribute, entity_subset, self.a_attributes))
+
+
+    def countNegativesAndPositives(self):
         for e in self.e_subset:
-            if e.final_class is "n":
+            if e.final_class == "n":
                 self.num_neg += 1
             else:
                 self.num_pos += 1
 
-            if self.num_neg == self.total:
-                self.node_type = "no"
-            elif self.num_pos == self.total:
-                self.node_type = "yes"
-            else:
-                self.node_type = "split"
+    def classifyNode(self):
+        if self.num_neg == self.total:
+            self.node_type = "no"
+        elif self.num_pos == self.total:
+            self.node_type = "yes"
+        else:
+            self.node_type = "split"
+
+        print self.node_type
 
     def calculateNodeEntropy(self):
         self.node_entropy = (logEquation(self.num_pos, self.total) + logEquation(self.num_neg, self.total))
-        print self.node_entropy
     
     def fillEntropyList(self):
         for a in self.a_attributes:
@@ -101,21 +109,18 @@ class Node:
         attribute = None
         for ent in self.entropy_list:
             test = self.node_entropy - ent.entropy
-            print test
             if test > gain:
                 gain = test
                 attribute = ent.attribute_number
 
+        self.attribute_to_split_on = attribute
+        print attribute
         print gain
 
     def calculateAttributeEntropy(self):
         for a in self.a_attributes:
             a_number = a.number
-            print a.name
-            print ""
             for sub_attribute in a.sub_attributes:
-                print sub_attribute
-                print ""
                 sub_attribute_list = self.makeSubattributeList(a_number, sub_attribute)
                 sub_attribute_total = len(sub_attribute_list)
                 sub_attribute_frac = float(sub_attribute_total)/self.total
