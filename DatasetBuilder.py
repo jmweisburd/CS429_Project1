@@ -9,7 +9,7 @@ class Datasets:
     def readTraining(self):
         with open("training.txt") as file:
             for line in file:
-                self.training.append(Entity(line))
+                self.training.append(Entity(line, True))
 
     def readTesting(self):
         with open("testing.txt") as file:

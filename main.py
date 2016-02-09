@@ -17,4 +17,9 @@ def attribute_dictionary(number):
         3: "wind"
     }[number]
 
-root = Node(None, None, data.training, possible_attributes_select)
+
+testDay = Entity("r,m,h,w", False)
+
+DT = DecisionTree(data.training, possible_attributes_select)
+
+DT.classifyEntity(testDay)

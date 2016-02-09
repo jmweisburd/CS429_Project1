@@ -9,9 +9,21 @@ def logEquation(num, den):
         a = float(num)/den
         return -(a)*(log(a,2))
 
-#class DecisionTree:
-#   def __init__(self, entity_list, all_attributes):
-#       root = Node(
+class DecisionTree:
+    def __init__(self, entity_list, all_attributes):
+       self.root = Node(None, None, entity_list, all_attributes)
+
+    def classifyEntity(self, entity):
+        current = self.root
+        final_type = None
+        while current.node_type == "split":
+            node_split = current.attribute_to_split_on
+            for n in current.children:
+                if entity.attributeList[node_split].value == n.parent_split_value:
+                    current = n
+
+        final_type = current.node_type
+        print final_type
 
 
 
