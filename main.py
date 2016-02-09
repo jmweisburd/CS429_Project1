@@ -17,4 +17,4 @@ def attribute_dictionary(number):
         3: "wind"
     }[number]
 
-root = Node(None, data.training, possible_attributes_select)
+root = Node(None, None, data.training, possible_attributes_select)

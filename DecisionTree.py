@@ -16,28 +16,49 @@ def logEquation(num, den):
 
 
 class Node:
-    def __init__(self, sub_attribute_split, e_subset, a_attributes):
-        self.e_subset = e_subset
-        self.a_attributes = a_attributes
-        #self.a_attributes = copy.deepcopy(a_attributes) #available attributes
-        self.sub_attribute_split = sub_attribute_split
-        self.total = len(e_subset)
-        self.num_pos = 0
-        self.num_neg = 0
-        self.node_type = None
-        self.a_entropy = None
-        self.node_entropy = 0
-        self.entropy_list = []
-        self.attribute_to_split_on = 0
-        self.children = []
+    def __init__(self, parent_split_attribute, parent_split_value, e_subset, a_attributes):
+        self.e_subset = e_subset #subset of the entities/mushrooms that made it to this node
+        self.a_attributes = a_attributes #available attributes to split on
         
-        self.countNegativesAndPositives()
-        print "number negatives:", self.num_neg
-        print "number positives:", self.num_pos
+        self.parent_split_attribute = parent_split_attribute #what attribute the parent node split on
+        self.parent_split_value = parent_split_value #what value the parent node split on
+        
+        self.total = len(e_subset) #how many entities this node has
+        
+        self.node_type = None #node_type: split, neg, or pos
+        self.node_entropy = 0
+        self.entropy_list = [] #list of entropies to split on
+        
+        self.attribute_to_split_on = None #if a split node, what attribute number to split on
+        
+        self.children = [] #list of child nodes
+        self.num_neg = self.countNegatives(e_subset)
+        self.num_pos = self.total - self.num_neg
+        
         self.classifyNode()
-        if self.node_type != "no" and self.node_type != "yes":
+        
+        if self.node_type != "neg" and self.node_type != "pos":
             self.splitNode()
-                    
+
+
+    #counts the negative entities in an entity list
+    def countNegatives(self, entity_list):
+        counter = 0
+        for e in entity_list:
+            if e.final_class == "n":
+                counter += 1
+    
+        return counter
+    
+    #classifies the node as either neg, pos, or split
+    def classifyNode(self):
+        if self.num_neg == self.total:
+            self.node_type = "neg"
+        elif self.num_pos == self.total:
+            self.node_type = "pos"
+        else:
+            self.node_type = "split"
+
     def splitNode(self):
         self.fillEntropyList()
         self.calculateNodeEntropy()
@@ -45,65 +66,46 @@ class Node:
         self.findMaxGain()
         self.splitOnAttribute()
 
-    def splitOnAttribute(self):
-        get_attribute = None
-        entity_subset = []
-        for a in self.a_attributes:
-            if a.number == self.attribute_to_split_on:
-                get_attribute = a
-                break
-    
-        #attributes_to_pass_on = copy.deepcopy(self.a_attributes)
-        #for a in attributes_to_pass_on:
-            #if a.number == self.attribute_to_split_on:
-            #attributes_to_pass_on.remove(a)
-        
-        for sub_attribute in get_attribute.sub_attributes:
-            print sub_attribute
-            entity_subset = []
-            entity_subset = self.makeSubattributeList(get_attribute.number, sub_attribute)
-            self.children.append(Node(sub_attribute, entity_subset, self.a_attributes))
-
-
-    def countNegativesAndPositives(self):
-        for e in self.e_subset:
-            if e.final_class == "n":
-                self.num_neg += 1
-            else:
-                self.num_pos += 1
-
-    def classifyNode(self):
-        if self.num_neg == self.total:
-            self.node_type = "no"
-        elif self.num_pos == self.total:
-            self.node_type = "yes"
-        else:
-            self.node_type = "split"
-
-        print self.node_type
-
-    def calculateNodeEntropy(self):
-        self.node_entropy = (logEquation(self.num_pos, self.total) + logEquation(self.num_neg, self.total))
-    
+    #makes EntropyAccumulators for each attribute to use to calculate the max gain
     def fillEntropyList(self):
         for a in self.a_attributes:
             self.entropy_list.append(EntropyAccumulator(a.number))
-    
-    def makeSubattributeList(self, a_number, sub_attribute):
-        sub_attribute_list = []
-        for e in self.e_subset:
-            if e.attributeList[a_number].value == sub_attribute:
-                sub_attribute_list.append(e)
-        
-        return sub_attribute_list
-    
-    def calculateNumberPositives(self, e_list):
-        counter = 0
-        for e in e_list:
-            if e.final_class == "y":
-                counter += 1
-        return counter
+
+    #calculates the entropy of the whole entity subset based on if the entities are pos or neg
+    #does not calculate entropies for attributes
+    def calculateNodeEntropy(self):
+        self.node_entropy = (logEquation(self.num_pos, self.total) + logEquation(self.num_neg, self.total))
+
+    #calculates the entropy of a particular value of a particular attribute
+    def calculateAttributeEntropy(self):
+        for a in self.a_attributes:
+            a_number = a.number
+            for value in a.values:
+                #make a subset of entities at this node with a particular attribute value
+                ents_with_value = self.makeValueSubset(a_number, value)
                 
+                subset_total = len(ents_with_value)
+                subset_frac = float(subset_total)/self.total
+                subset_neg = self.countNegatives(ents_with_value)
+                subset_pos = subset_total - subset_neg
+                
+                subset_value_entropy = subset_frac*(logEquation(subset_pos, subset_total) + logEquation(subset_neg, subset_total))
+                
+                for entropy in self.entropy_list:
+                    if entropy.attribute_number == a.number:
+                        entropy.addEntropy(subset_value_entropy)
+                        break
+
+    #Finds all of the entities in a list with a particular attribute value
+    def makeValueSubset(self, a_number, value):
+        ents_with_value = []
+        for e in self.e_subset:
+            if e.attributeList[a_number].value == value:
+                ents_with_value.append(e)
+
+        return ents_with_value
+
+    #finds the max information gain at a node after finding all the entropies for each attribute
     def findMaxGain(self):
         gain = 0
         attribute = None
@@ -114,22 +116,24 @@ class Node:
                 attribute = ent.attribute_number
 
         self.attribute_to_split_on = attribute
-        print attribute
-        print gain
 
-    def calculateAttributeEntropy(self):
+    def splitOnAttribute(self):
+        get_attribute = None
+        entity_subset = []
         for a in self.a_attributes:
-            a_number = a.number
-            for sub_attribute in a.sub_attributes:
-                sub_attribute_list = self.makeSubattributeList(a_number, sub_attribute)
-                sub_attribute_total = len(sub_attribute_list)
-                sub_attribute_frac = float(sub_attribute_total)/self.total
-                sub_attribute_pos = self.calculateNumberPositives(sub_attribute_list)
-                sub_attribute_neg = sub_attribute_total - sub_attribute_pos
-                sub_attribute_entropy = sub_attribute_frac*(logEquation(sub_attribute_pos, sub_attribute_total) + logEquation(sub_attribute_neg, sub_attribute_total))
-                for ent in self.entropy_list:
-                    if ent.attribute_number == a.number:
-                        ent.addEntropy(sub_attribute_entropy)
+            if a.number == self.attribute_to_split_on:
+                get_attribute = a
+                break
+    
+        attributes_to_pass_on = copy.deepcopy(self.a_attributes)
+        for a in attributes_to_pass_on:
+            if a.number == self.attribute_to_split_on:
+                attributes_to_pass_on.remove(a)
+        
+        for value in get_attribute.values:
+            entity_subset = []
+            entity_subset = self.makeValueSubset(get_attribute.number, value)
+            self.children.append(Node(get_attribute.number, value, entity_subset, attributes_to_pass_on))
 
 
 class EntropyAccumulator:
