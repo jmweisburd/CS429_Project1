@@ -18,8 +18,8 @@ def attribute_dictionary(number):
     }[number]
 
 
-testDay = Entity("r,m,h,w", False)
+testDay = Entity("r,m,h,s", False)
 
-DT = DecisionTree(data.training, possible_attributes_select)
+DT = DecisionTree(data.training, possible_attributes_select, False)
 
 DT.classifyEntity(testDay)
