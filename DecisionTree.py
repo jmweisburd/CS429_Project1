@@ -64,7 +64,7 @@ class Node:
     def countNegatives(self, entity_list):
         counter = 0
         for e in entity_list:
-            if e.final_class == "n":
+            if e.final_class == "p":
                 counter += 1
     
         return counter

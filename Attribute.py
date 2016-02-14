@@ -7,3 +7,4 @@ class MasterAttribute:
         self.name = name
         self.number = number
         self.values = values #list of possible values attribute can have
+        self.dof = len(self.values) - 1
