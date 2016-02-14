@@ -71,12 +71,18 @@ class Node:
     
     #classifies the node as either neg, pos, or split
     def classifyNode(self):
-        if self.num_neg == self.total:
-            self.node_type = "neg"
-        elif self.num_pos == self.total:
-            self.node_type = "pos"
+        if len(self.a_attributes) == 0 or self.parent_split_value == "?":
+            if self.num_neg >= self.num_pos:
+                self.node_type = "neg"
+            else:
+                self.node_type = "pos"
         else:
-            self.node_type = "split"
+            if self.num_neg == self.total:
+                self.node_type = "neg"
+            elif self.num_pos == self.total:
+                    self.node_type = "pos"
+            else:
+                self.node_type = "split"
 
     def splitNodeEntropy(self):
         self.fillEntropyList()
@@ -144,7 +150,12 @@ class Node:
                 ents_with_value = self.makeValueSubset(a_number, value)
                 
                 subset_total = len(ents_with_value)
-                subset_frac = float(subset_total)/self.total
+                
+                if subset_total == 0:
+                    subset_frac = 0
+                else:
+                    subset_frac = float(subset_total)/self.total
+                
                 subset_neg = self.countNegatives(ents_with_value)
                 subset_pos = subset_total - subset_neg
                 

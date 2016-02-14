@@ -20,6 +20,9 @@ def attribute_dictionary(number):
 
 testDay = Entity("r,m,h,s", False)
 
-DT = DecisionTree(data.training, possible_attributes_select, False)
+#DT = DecisionTree(data.training, possible_attributes_select, False)
 
-DT.classifyEntity(testDay)
+#DT.classifyEntity(testDay)
+
+cs = ChiSquared()
+cs.lookup(11, 99)
