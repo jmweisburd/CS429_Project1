@@ -24,7 +24,7 @@ class Datasets:
 
 
 class ChiSquared:
-    
+
     def __init__(self):
         self.maxDOF = 20
         self.number_alphas = 3
@@ -37,10 +37,10 @@ class ChiSquared:
             for line in file:
                 col = 0
                 for num in line.strip().split(','):
-                    self.chi_table[row][col] = num
+                    self.chi_table[row][col] = float(num)
                     col += 1
                 row += 1
-    
+
     def printChiSquaredTable(self):
         for row in range(0,19):
             for col in range(0,3):
@@ -50,7 +50,6 @@ class ChiSquared:
     def lookup(self, dof, confindence):
         col = self.confidenceToCol(confindence)
         row = dof - 1
-        print self.chi_table[row][col]
         return self.chi_table[row][col]
 
     def confidenceToCol(self, x):

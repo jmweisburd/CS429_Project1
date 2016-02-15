@@ -30,6 +30,8 @@ possible_attributes_select = [MasterAttribute("cap-shape", 0, ["b", "c", "x", "f
 
 #master_attribute_list = copy.deepcopy(possible_attributes_select)
 
+cs = ChiSquared()
+
 def attribute_dictionary(number):
     return {
         0: "outlook",
@@ -41,9 +43,6 @@ def attribute_dictionary(number):
 
 test_mushroom = Entity("f,y,g,f,f,f,c,b,g,e,b,k,k,n,n,p,w,o,l,h,v,d", False)
 
-DT = DecisionTree(data.training, possible_attributes_select, True)
+DT = DecisionTree(data.training, possible_attributes_select, cs, 99, True)
 
 DT.classifyEntity(test_mushroom)
-
-cs = ChiSquared()
-cs.lookup(11, 99)
