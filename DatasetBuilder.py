@@ -15,13 +15,19 @@ class Datasets:
     def readTesting(self):
         with open("testing.txt") as file:
             for line in file:
-                self.testing.append(Entity(line))
+                self.testing.append(Entity(line, True))
 
     def readValidation(self):
         with open("validation.txt") as file:
             for line in file:
-                self.validation.append(Entity(line))
+                self.validation.append(Entity(line, True))
 
+    def writeAnswerFile(self):
+        file = open('answer.txt', 'w')
+        for ent in self.validation:
+            file.write(ent.final_class)
+            file.write('\n')
+        file.close()
 
 class ChiSquared:
 
@@ -45,7 +51,6 @@ class ChiSquared:
         for row in range(0,19):
             for col in range(0,3):
                 print self.chi_table[row][col]
-
 
     def lookup(self, dof, confindence):
         col = self.confidenceToCol(confindence)

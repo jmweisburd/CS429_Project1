@@ -3,9 +3,12 @@ from DecisionTree import *
 import copy
 
 data = Datasets()
+cs = ChiSquared()
 data.readTraining()
+data.readTesting()
+data.readValidation()
 
-possible_attributes_select = [MasterAttribute("cap-shape", 0, ["b", "c", "x", "f", "k", "s"]),
+all_attributes = [MasterAttribute("cap-shape", 0, ["b", "c", "x", "f", "k", "s"]),
                               MasterAttribute("cap-surface", 1, ["f", "g", "y", "s"]),
                               MasterAttribute("cap-color", 2, ["n", "b", "c", "g", "r", "p", "u", "e", "w", "y"]),
                               MasterAttribute("bruises?", 3, ["t","f"]),
@@ -28,21 +31,17 @@ possible_attributes_select = [MasterAttribute("cap-shape", 0, ["b", "c", "x", "f
                               MasterAttribute("population", 20, ["a", "c", "n", "s", "v", "y"]),
                               MasterAttribute("habitat", 21, ["g", "l", "m", "p","u","w","d"])]
 
-#master_attribute_list = copy.deepcopy(possible_attributes_select)
+#dt_ent_99 = DecisionTree("Entropy Split, 99 Confidence", data.training, data.testing, all_attributes, cs, 99, True)
+#dt_ent_95 = DecisionTree("Entropy Split, 95 Confidence", data.training, data.testing, all_attributes, cs, 95, True)
+#dt_ent_50 = DecisionTree("Entropy Split, 50 Confidence", data.training, data.testing, all_attributes, cs, 50, True)
+dt_ent_00 = DecisionTree("Entropy Split, 00 Confidence", data.training, data.testing, all_attributes, cs, 0, True)
 
-cs = ChiSquared()
+#dt_ce_99 = DecisionTree("Class Error Split, 99 Confidence", data.training, data.testing, all_attributes, cs, 99, False)
+#dt_ce_95 = DecisionTree("Class Error Split, 95 Confidence", data.training, data.testing, all_attributes, cs, 95, False)
+#dt_ce_50 = DecisionTree("Class Error Split, 50 Confidence", data.training, data.testing, all_attributes, cs, 50, False)
+#dt_ce_00 = DecisionTree("Class Error Split, 00 Confidence", data.training, data.testing, all_attributes, cs, 0, False)
 
-def attribute_dictionary(number):
-    return {
-        0: "outlook",
-        1: "temperature",
-        2: "humidity",
-        3: "wind"
-    }[number]
+#dt_list = [dt_ent_99, dt_ent_95, dt_ent_50, dt_ent_00, dt_ce_99, dt_ce_95, dt_ce_50, dt_ce_00]
 
-
-test_mushroom = Entity("f,y,g,f,f,f,c,b,g,e,b,k,k,n,n,p,w,o,l,h,v,d", False)
-
-DT = DecisionTree(data.training, possible_attributes_select, cs, 99, True)
-
-DT.classifyEntity(test_mushroom)
+dt_ent_00.validateSet(data.validation)
+data.writeAnswerFile()

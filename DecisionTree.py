@@ -23,14 +23,16 @@ def chiSquaredValue(r_pos, e_pos, r_neg, e_neg):
     return p_term + n_term
 
 class DecisionTree:
-    def __init__(self, entity_list, all_attributes, chi_squared_table, confidence, splitting_on_entropy):
-        self.root = Node(None, None, entity_list, all_attributes, splitting_on_entropy, 0)
+    def __init__(self, title, training_list, testing_list, all_attributes, chi_squared_table, confidence, splitting_on_entropy):
+        self.root = Node(None, None, training_list, all_attributes, splitting_on_entropy, 0)
+        self.title = title
         self.all_attributes = all_attributes
         self.chi_squared_table = chi_squared_table
         self.confidence = confidence
+        self.accuracy = 0
+        self.testing_list = testing_list
         self.pruneTree(self.root)
-        #self.visitAllNodes(self.root)
-        self.rootVisit()
+        self.measureAccuracy()
 
     def classifyEntity(self, entity):
         current = self.root
@@ -42,7 +44,10 @@ class DecisionTree:
                     current = n
 
         final_type = current.node_type
-        print final_type
+        if final_type == "pos":
+            return "e"
+        else:
+            return "p"
 
     def pruneTree(self, node):
         if node.node_type != "split":
@@ -93,6 +98,23 @@ class DecisionTree:
             chi_look_up = self.chi_squared_table.lookup(dof, self.confidence)
             if chi_value <= chi_look_up:
                 node.consolidateNode()
+
+    def measureAccuracy(self):
+        wrong = 0
+        total = len(self.testing_list)
+        for ent in self.testing_list:
+            test = self.classifyEntity(ent)
+            if test != ent.final_class:
+                wrong += 1
+
+        right = total - wrong
+        self.accuracy = float(right)/total
+        print self.accuracy
+
+    def validateSet(self, validation_list):
+        for ent in validation_list:
+            ent.final_class = self.classifyEntity(ent)
+
 
 class Node:
     def __init__(self, parent_split_attribute, parent_split_value, e_subset, a_attributes, splitting_on_entropy, height):
