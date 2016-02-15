@@ -36,12 +36,12 @@ all_attributes = [MasterAttribute("cap-shape", 0, ["b", "c", "x", "f", "k", "s"]
 #dt_ent_50 = DecisionTree("Entropy Split, 50 Confidence", data.training, data.testing, all_attributes, cs, 50, True)
 dt_ent_00 = DecisionTree("Entropy Split, 00 Confidence", data.training, data.testing, all_attributes, cs, 0, True)
 
-#dt_ce_99 = DecisionTree("Class Error Split, 99 Confidence", data.training, data.testing, all_attributes, cs, 99, False)
+dt_ce_99 = DecisionTree("Class Error Split, 99 Confidence", data.training, data.testing, all_attributes, cs, 99, False)
 #dt_ce_95 = DecisionTree("Class Error Split, 95 Confidence", data.training, data.testing, all_attributes, cs, 95, False)
 #dt_ce_50 = DecisionTree("Class Error Split, 50 Confidence", data.training, data.testing, all_attributes, cs, 50, False)
 #dt_ce_00 = DecisionTree("Class Error Split, 00 Confidence", data.training, data.testing, all_attributes, cs, 0, False)
 
 #dt_list = [dt_ent_99, dt_ent_95, dt_ent_50, dt_ent_00, dt_ce_99, dt_ce_95, dt_ce_50, dt_ce_00]
 
-dt_ent_00.validateSet(data.validation)
-data.writeAnswerFile()
+#dt_ent_00.validateSet(data.validation)
+#data.writeAnswerFile()

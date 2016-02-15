@@ -186,6 +186,7 @@ class Node:
         self.splitOnAttribute()
 
     def splitNodeClassError(self):
+        print "splitting on class error"
         self.fillClassErrorList()
         self.calculateNodeClassError()
         self.calculateAttributeClassError()
