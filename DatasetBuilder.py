@@ -28,7 +28,7 @@ class Datasets:
                 self.validation.append(Entity(line, True))
 
     def writeAnswerFile(self):
-        file = open('answer.txt', 'w')
+        file = open('result.txt', 'w')
         for ent in self.validation:
             file.write(ent.final_class)
             file.write('\n')

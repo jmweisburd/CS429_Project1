@@ -39,15 +39,17 @@ the DecisionTree class can calculate its accuracy from that set.
 class DecisionTree:
     #
     def __init__(self, title, training_list, testing_list, all_attributes, chi_squared_table, confidence, splitting_on_entropy):
-        self.root = Node(None, None, training_list, all_attributes, splitting_on_entropy, 0)
+        self.root = Node(None, None, training_list, all_attributes, splitting_on_entropy)
         self.title = title #title of the tree
         self.all_attributes = all_attributes #all possible attributes to split on
         self.testing_list = testing_list
         self.chi_squared_table = chi_squared_table #chi squared table to look up values for pruning
         self.confidence = confidence  #confidence we want to prune the tree to
         self.accuracy = 0 #accuracy of the tree. calculated from a testing set
+        self.splitting_on_entropy = splitting_on_entropy
 
         self.pruneTree(self.root) #function to prune the tree
+        #self.rootVisit()
         self.measureAccuracy() #function to measure the accuracy of the tree
 
     #function to classify an object/entity as either edible or poisonious
@@ -81,19 +83,25 @@ class DecisionTree:
 
     #Not a function to be used. Just a function to help me better understand the tree
     def rootVisit(self):
-        root_child = self.root.children[6]
-        root_child_2 = root_child.children[7]
-        root_child_3 = root_child_2.children[1]
-        root_child_4 = root_child_2.children[6]
-        for n in root_child_3.children:
-            print n.node_type
+        split_odor_n = self.root.children[6]
+        split_spore_w = split_odor_n.children[7]
+        split_habitat_l = split_spore_w.children[1]
+        split_habitat_d = split_spore_w.children[6]
+        for n in split_spore_w.children:
+        #for n in split_habitat_l.children:
+            print n.node_type, " ", n.parent_split_attribute, n.parent_split_value
+        #root_child = self.root.children[6]
+        #root_child_child = root_child.children[7]
+        #root_child_3 = root_child_child.children[3]
+        #for n in root_child_3.children:
+            #print n.node_type
 
     def visitAllNodes(self, node):
         if len(node.children) == 0:
-            #print node.node_type
+            print node.node_type
             return
         else:
-            #print node.node_type, " ", node.attribute_to_split_on
+            print node.node_type
             for n in node.children:
                 self.visitAllNodes(n)
 
@@ -142,7 +150,6 @@ class DecisionTree:
 
         right = total - wrong
         self.accuracy = float(right)/total
-        print self.accuracy
 
     #function which takes in a list of objects to classify
     #classifys each entity in the list as either "p" or "e"
@@ -227,7 +234,6 @@ class Node:
 
     #helper function which splits the node based on the class error heuristic
     def splitNodeClassError(self):
-        print "splitting on class error"
         self.fillClassErrorList()
         self.calculateNodeClassError()
         self.calculateAttributeClassError()
